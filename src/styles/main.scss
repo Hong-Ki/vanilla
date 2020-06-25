@@ -1,0 +1,14 @@
+@import './resets';
+@import './mixins';
+@import './values';
+
+html,
+body {
+  display: block;
+  height: 100vh;
+  width: 100vw;
+}
+
+#root {
+  display: flex;
+}
