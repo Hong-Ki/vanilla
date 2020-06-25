@@ -29,6 +29,23 @@ module.exports = {
           },
         ],
       },
+      {
+        test: /\.module\.s(a|c)ss$/i,
+        loader: [
+          'style-loader',
+          { loader: 'css-loader', options: { modules: true, sourceMap: true } },
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: ['autoprefixer'],
+            },
+          },
+          {
+            loader: 'sass-loader',
+            options: { sourceMap: true, modules: true },
+          },
+        ],
+      },
     ],
   },
   resolve: {
