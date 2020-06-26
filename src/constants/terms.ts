@@ -1,4 +1,4 @@
-const terms = [
+export const TERMS = [
   {
     termsId: '1',
     title: '본인확인 이용동의',
