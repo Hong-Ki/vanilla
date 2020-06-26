@@ -1,5 +1,5 @@
 import styles from './Header.module.scss';
-export default (title: string, description?: string) => {
+export default (title: string, description?: string): HTMLHeadElement => {
   const fragment = new DocumentFragment();
 
   const titleElement = document.createElement('h1');
