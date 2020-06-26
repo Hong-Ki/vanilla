@@ -1,9 +1,12 @@
 import styles from './TermsGroup.module.scss';
 import { TERMS } from '../../constants/terms';
 import Checkbox from '../../components/Checkbox/Checkbox';
-import { isAllCheckedMap } from '../../util/common';
+import { isAllTrueMap, parseEventTargetToElement } from '../../util/common';
 
-export default function (): HTMLElement {
+interface Props {
+  onChange?(e: Event, isChangeAll?: boolean): void;
+}
+export default function ({ onChange }: Props = {}): HTMLElement {
   const fragment = new DocumentFragment();
   const memberStatus = new Map<string, boolean>();
 
@@ -12,12 +15,15 @@ export default function (): HTMLElement {
     const CheckboxComponent = Checkbox({
       label: title,
       id: termsId,
-      onChange: ({ target }) => {
-        const { checked, id } = target as HTMLInputElement;
+      onChange: e => {
+        const { checked, id } = parseEventTargetToElement<HTMLInputElement>(
+          e.target,
+        );
         memberStatus.set(id, checked);
-        const isAllChecked = isAllCheckedMap(memberStatus);
+        const isAllChecked = isAllTrueMap(memberStatus);
         const inputElement = checkAllElement.querySelector('input');
         if (inputElement) inputElement.checked = isAllChecked;
+        if (onChange) onChange(e, false);
       },
     });
     fragment.appendChild(CheckboxComponent);
@@ -35,12 +41,13 @@ export default function (): HTMLElement {
   );
   const checkAllElement = Checkbox({
     label: '전체 동의하기',
-    onChange: ({ target }) => {
-      const { checked } = target as HTMLInputElement;
+    onChange: e => {
+      const { checked } = parseEventTargetToElement<HTMLInputElement>(e.target);
       members.forEach(member => {
         const checkboxElement = member.querySelector('input');
         if (checkboxElement) checkboxElement.checked = checked;
       });
+      if (onChange) onChange(e, true);
     },
   });
   checkAllElement.classList.add(styles['check-all']);
