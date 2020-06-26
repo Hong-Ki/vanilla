@@ -13,14 +13,15 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: /\.s(a|c)ss$/i,
-        loader: [
+        test: /\.(scss|sass)$/,
+        exclude: /\.module\.(scss|sass)$/,
+        use: [
           'style-loader',
           { loader: 'css-loader', options: { sourceMap: true } },
           {
             loader: 'postcss-loader',
             options: {
-              plugins: ['autoprefixer'],
+              plugins: [require('autoprefixer')],
             },
           },
           {
@@ -30,19 +31,19 @@ module.exports = {
         ],
       },
       {
-        test: /\.module\.s(a|c)ss$/i,
-        loader: [
+        test: /\.module\.(scss|sass)$/,
+        use: [
           'style-loader',
-          { loader: 'css-loader', options: { modules: true, sourceMap: true } },
+          { loader: 'css-loader', options: { sourceMap: true, modules: true } },
           {
             loader: 'postcss-loader',
             options: {
-              plugins: ['autoprefixer'],
+              plugins: [require('autoprefixer')],
             },
           },
           {
             loader: 'sass-loader',
-            options: { sourceMap: true, modules: true },
+            options: { sourceMap: true },
           },
         ],
       },
