@@ -1,8 +1,10 @@
 @import './../../styles/values';
+@import './../../styles/mixins';
+
+@include basic-wrapper;
 
 .selectbox {
-  width: $full-size;
-  height: 2rem;
+  @include shadow-box;
 
   &:hover {
     cursor: pointer;
