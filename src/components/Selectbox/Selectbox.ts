@@ -18,15 +18,8 @@ export default ({
   onChange,
 }: Props = {}) => {
   const fragment = new DocumentFragment();
-  let elementId = id;
 
-  if (label && !id) elementId = createId('label');
-
-  if (label) {
-    const labelElement = Label({ htmlFor: elementId, label });
-    fragment.appendChild(labelElement);
-  }
-
+  const optionFragment = new DocumentFragment();
   if (options) {
     options.forEach(({ name, value }) => {
       const option = document.createElement('option');
@@ -34,17 +27,32 @@ export default ({
       option.text = name;
       option.selected = value === defaultValue;
 
-      fragment.appendChild(option);
+      optionFragment.appendChild(option);
     });
   }
+  let elementId = id;
 
-  const selectbox = document.createElement('select');
-  selectbox.className = styles.selectbox;
-  selectbox.appendChild(fragment);
+  if (label && !id) elementId = createId('label');
 
-  if (elementId) selectbox.id = elementId;
-  if (name) selectbox.name = name;
-  if (onChange) selectbox.addEventListener('change', onChange);
+  if (label) {
+    const labelComponent = Label({ htmlFor: elementId, label });
+    fragment.appendChild(labelComponent);
+  }
 
-  return selectbox;
+  const selectboxElement = document.createElement('select');
+  selectboxElement.className = styles.selectbox;
+  selectboxElement.appendChild(optionFragment);
+
+  if (elementId) selectboxElement.id = elementId;
+  if (name) selectboxElement.name = name;
+  if (onChange) selectboxElement.addEventListener('change', onChange);
+
+  fragment.appendChild(selectboxElement);
+
+  const wrapperElement = document.createElement('div');
+  wrapperElement.className = styles.wrapper || '';
+
+  wrapperElement.appendChild(fragment);
+
+  return wrapperElement;
 };
