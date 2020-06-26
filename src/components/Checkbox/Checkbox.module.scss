@@ -1,0 +1,20 @@
+@import './../../styles/values';
+
+.wrapper {
+  width: $full-size;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px;
+  font-size: 24px;
+
+  & > input {
+    width: 1.3rem;
+    height: 1.3rem;
+  }
+
+  & > label {
+    flex-grow: 1;
+    text-align: right;
+  }
+}
