@@ -58,7 +58,7 @@ module.exports = {
         collapseWhitespace: true,
       },
       hash: true,
-      template: './public/index.html',
+      template: './static/index.html',
     }),
     new MiniCssExtractPlugin({
       filename: '[name].css',
@@ -67,6 +67,6 @@ module.exports = {
   ],
   output: {
     filename: 'bundle.js',
-    path: path.resolve(__dirname, 'build'),
+    path: path.resolve(__dirname, 'public'),
   },
 };
