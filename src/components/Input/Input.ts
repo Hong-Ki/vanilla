@@ -25,7 +25,7 @@ export default ({
   }
 
   const inputElement = document.createElement('input');
-  inputElement.className = styles.selectbox;
+  inputElement.className = styles.input;
 
   if (elementId) inputElement.id = elementId;
   if (name) inputElement.name = name;
