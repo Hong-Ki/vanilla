@@ -6,7 +6,3 @@
 .input {
   @include shadow-box;
 }
-
-.input.invalid {
-  @include invalid-input;
-}
