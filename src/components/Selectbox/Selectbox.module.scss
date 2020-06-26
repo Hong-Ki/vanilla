@@ -1,6 +1,10 @@
-.selectbox {
-  width: 300px;
-  height: 120px;
+@import './../../styles/values';
 
-  border: 1px solid blue;
+.selectbox {
+  width: $full-size;
+  height: 2rem;
+
+  &:hover {
+    cursor: pointer;
+  }
 }
