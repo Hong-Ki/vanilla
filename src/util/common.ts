@@ -5,7 +5,7 @@ export function createId(prefix = ''): string {
   return `${prefix}_${s4()}${s4()}`;
 }
 
-export function isAllCheckedMap(map: Map<string, boolean>): boolean {
+export function isAllTrueMap(map: Map<string, boolean>): boolean {
   let result = true;
 
   for (let checked of map.values()) {
@@ -14,4 +14,10 @@ export function isAllCheckedMap(map: Map<string, boolean>): boolean {
   }
 
   return true;
+}
+
+export function parseEventTargetToElement<T extends HTMLElement>(
+  target: EventTarget | null,
+): T {
+  return target as T;
 }
