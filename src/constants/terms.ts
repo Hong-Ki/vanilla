@@ -20,3 +20,7 @@ export const TERMS = [
     required: false,
   },
 ];
+
+export const REQUIRED_TERMS_IDS = TERMS.filter(
+  ({ required }) => required,
+).reduce<string[]>((acc, { termsId }) => [...acc, termsId], []);
