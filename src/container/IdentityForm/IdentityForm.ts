@@ -63,41 +63,33 @@ export default function ({ onSubmit }: Props = {}): HTMLFormElement {
 
       switch (data.phoneNumber.length) {
         case 0:
-          TelInputComponent.classList.remove(styles.invalid);
-          break;
-        case 3:
-        case 6:
-          parseEventTargetToElement<HTMLInputElement>(
-            e.target,
-          ).value = `${value} `;
-          break;
         case 10:
           TelInputComponent.classList.remove(styles.invalid);
           break;
         case 11:
-          parseEventTargetToElement<HTMLInputElement>(
-            e.target,
-          ).value = `${data.phoneNumber.substring(
-            0,
-            3,
-          )} ${data.phoneNumber.substring(3, 7)} ${data.phoneNumber.substring(
-            7,
-          )}`;
           const next = IdentityInputComponent.querySelector('input');
           if (next) next.focus();
           break;
       }
     },
-    onBlur: () => {
+    onBlur: e => {
       const { length } = data.phoneNumber;
+
       if (length < 10 || length > 11) {
         TelInputComponent.classList.add(styles.invalid);
         error.set('phoneNumber', false);
         return;
       }
+
       checkValidations();
       error.set('phoneNumber', true);
       TelInputComponent.classList.remove(styles.invalid);
+
+      const target = parseEventTargetToElement<HTMLInputElement>(e.target);
+      target.value = target.value.replace(
+        /(\d{3})(\d{3,4})(\d*)/gi,
+        '$1 $2 $3',
+      );
     },
   });
   const IdentityInputComponent = Input({
@@ -109,29 +101,25 @@ export default function ({ onSubmit }: Props = {}): HTMLFormElement {
       const { value = '' } = parseEventTargetToElement<HTMLInputElement>(
         e.target,
       );
-
       if (eventData && eventData.match(new RegExp(/[^0-9]/, 'gi'))) {
         parseEventTargetToElement<HTMLInputElement>(e.target).value =
           data.registerNumber;
         return;
       }
       data.registerNumber = value.replace(/[^0-9]/gi, '');
-      switch (data.registerNumber.length) {
-        case 0:
-          IdentityInputComponent.classList.remove(styles.invalid);
-          break;
-        case 6:
-          parseEventTargetToElement<HTMLInputElement>(
-            e.target,
-          ).value = `${value}-`;
-          break;
-        case 7:
-          const next = NameInputComponent.querySelector('input');
-          if (next) next.focus();
-          break;
+
+      if (value.length === 0) {
+        IdentityInputComponent.classList.remove(styles.invalid);
+      }
+      if (value.length >= 7) {
+        IdentityInputComponent.classList.remove(styles.invalid);
+        const next = NameInputComponent.querySelector('input');
+        if (next) next.focus();
       }
     },
-    onBlur: () => {
+    onBlur: e => {
+      const target = parseEventTargetToElement<HTMLInputElement>(e.target);
+      target.value = target.value.replace(/(\d{6})(\d*)/gi, '$1-$2');
       const { length } = data.registerNumber;
       if (length !== 7) {
         IdentityInputComponent.classList.add(styles.invalid);
