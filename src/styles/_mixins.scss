@@ -1,7 +1,7 @@
 @import './values';
 @mixin shadow-box {
   width: $full-size;
-  height: 2rem;
+  height: 32px;
 
   border: none;
   border-radius: $default-radius;
