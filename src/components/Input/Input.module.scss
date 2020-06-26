@@ -1,6 +1,12 @@
 @import './../../styles/values';
+@import './../../styles/mixins';
 
-.wrapper {
-  width: $full-size;
-  height: 24rem;
+@include basic-wrapper;
+
+.input {
+  @include shadow-box;
+}
+
+.input.invalid {
+  @include invalid-input;
 }
