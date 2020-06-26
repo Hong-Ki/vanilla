@@ -1,8 +1,7 @@
 import App from './App';
-import styles from './styles/main.scss';
+import './styles/main.scss';
 
-(function () {
-  console.log(styles);
+window.onload = function () {
   const el = document.getElementById('root');
   if (el) el.append(App());
-})();
+};
