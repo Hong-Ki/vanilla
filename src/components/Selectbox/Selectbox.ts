@@ -3,10 +3,16 @@ export interface Option {
   name: string;
   value: string | number;
 }
-export default (options: Option[] = [], defaultValue?: string) => {
-  console.log(styles);
+export interface Props {
+  options: Option[];
+  defaultValue?: string;
+  onChange?(e: Event): void;
+}
+export default ({ options, defaultValue, onChange }: Props) => {
   const selectbox = document.createElement('select');
-  selectbox.className = 'form__selectbox';
+  selectbox.className = styles.selectbox;
+
+  const fragment = new DocumentFragment();
 
   options.forEach(({ name, value }) => {
     const option = document.createElement('option');
@@ -14,8 +20,12 @@ export default (options: Option[] = [], defaultValue?: string) => {
     option.text = name;
     option.selected = value === defaultValue;
 
-    selectbox.appendChild(option);
+    fragment.appendChild(option);
   });
+
+  selectbox.appendChild(fragment);
+
+  if (onChange) selectbox.addEventListener('change', onChange);
 
   return selectbox;
 };
