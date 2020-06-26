@@ -1,7 +1,13 @@
+@import './../../styles/values';
 .label {
   display: block;
 
-  font-size: 1.1rem;
+  color: $color-shadow;
+
+  font-size: 0.8rem;
+  font-weight: bold;
+
+  line-height: 1.4;
 
   &:hover {
     cursor: pointer;
