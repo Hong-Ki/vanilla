@@ -1,0 +1,14 @@
+@import './../../styles/values';
+
+.header {
+  h1 {
+    font-size: 2rem;
+    color: $color-normal-text;
+    font-weight: bold;
+  }
+
+  p {
+    font-size: 1.4rem;
+    color: $color-emphasize-text;
+  }
+}
