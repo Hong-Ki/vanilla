@@ -4,17 +4,31 @@ import { TELECOMS } from '../../constants/telecoms';
 import Input from '../../components/Input/Input';
 import Message from '../../components/Message/Message';
 import TermsGroup from '../TermsGrop/TermsGroup';
-import { parseEventTargetToElement } from '../../util/common';
+import { isNumberOnly } from '../../util/common';
 import { TERMS, REQUIRED_TERMS_IDS } from '../../constants/terms';
+import {
+  PHONE_NUMBER_INPUT_PROPS,
+  NOT_NUMBER_REGEXP,
+  IDENTITY_INPUT_PROPS,
+  NAME_INPUT_PROPS,
+  KOREAN_REGEXP_ALL,
+  TELECOM_SELECT_PROPS,
+  FORM_FAQ_MESSAGE,
+} from '../../constants/identityForm';
+import {
+  Data,
+  DataKey,
+  checkAllValidation,
+  checkPhoneNumber,
+  checkIdentity,
+  checkName,
+} from '../../util/validation';
+import {
+  parseEventTargetToElement,
+  parsePhoneNumber,
+  parseRegisterNumber,
+} from '../../util/parser';
 
-interface Data {
-  name: string;
-  registerNumber: string;
-  carrierCode: string;
-  phoneNumber: string;
-  termsCode: string[];
-}
-type DataKey = keyof Data;
 interface Props {
   onSubmit?(data: Data): void;
 }
@@ -30,12 +44,10 @@ export default function ({ onSubmit }: Props = {}): HTMLFormElement {
   };
   const error = new Map<DataKey, boolean>();
   error.set('carrierCode', true);
+  data.carrierCode = TELECOMS[0].code;
 
-  const checkValidations = (): void => {
-    const result = Object.entries(data).reduce((acc, [key, value]) => {
-      return (acc =
-        (error.get(key as DataKey) || false) && acc && value.length > 0);
-    }, true);
+  const updateValidation = () => {
+    const result = checkAllValidation(data, error);
     if (result) {
       submitElement.classList.remove(styles.disabled);
       submitElement.disabled = false;
@@ -45,26 +57,25 @@ export default function ({ onSubmit }: Props = {}): HTMLFormElement {
     }
   };
 
-  const TelInputComponent = Input({
-    label: '전화번호',
-    placeholder: '010 1234 5678',
+  const PhoneNumberInputComponent = Input({
+    ...PHONE_NUMBER_INPUT_PROPS,
     onChange: e => {
       const { data: eventData } = e as InputEvent | { data: '' };
-      const { value = '' } = parseEventTargetToElement<HTMLInputElement>(
-        e.target,
-      );
+      const target = parseEventTargetToElement<HTMLInputElement>(e.target);
+      const { value } = target;
 
-      if (eventData && eventData.match(new RegExp(/[^0-9]/, 'gi'))) {
-        parseEventTargetToElement<HTMLInputElement>(e.target).value =
-          data.phoneNumber;
+      if (eventData && eventData.match(NOT_NUMBER_REGEXP)) {
+        target.value = data.phoneNumber;
         return;
       }
-      data.phoneNumber = value.replace(/[^0-9]/gi, '');
+
+      data.phoneNumber = value.replace(NOT_NUMBER_REGEXP, '');
 
       switch (data.phoneNumber.length) {
         case 0:
+          error.set('phoneNumber', false);
         case 10:
-          TelInputComponent.classList.remove(styles.invalid);
+          PhoneNumberInputComponent.classList.remove(styles.invalid);
           break;
         case 11:
           const next = IdentityInputComponent.querySelector('input');
@@ -73,45 +84,36 @@ export default function ({ onSubmit }: Props = {}): HTMLFormElement {
       }
     },
     onBlur: e => {
-      const { length } = data.phoneNumber;
-
-      if (length < 10 || length > 11) {
-        TelInputComponent.classList.add(styles.invalid);
+      if (!checkPhoneNumber(data.phoneNumber)) {
+        PhoneNumberInputComponent.classList.add(styles.invalid);
         error.set('phoneNumber', false);
-        return;
+      } else {
+        PhoneNumberInputComponent.classList.remove(styles.invalid);
+        error.set('phoneNumber', true);
+
+        const target = parseEventTargetToElement<HTMLInputElement>(e.target);
+        target.value = parsePhoneNumber(target.value);
       }
 
-      checkValidations();
-      error.set('phoneNumber', true);
-      TelInputComponent.classList.remove(styles.invalid);
-
-      const target = parseEventTargetToElement<HTMLInputElement>(e.target);
-      target.value = target.value.replace(
-        /(\d{3})(\d{3,4})(\d*)/gi,
-        '$1 $2 $3',
-      );
+      updateValidation();
     },
   });
   const IdentityInputComponent = Input({
-    label: '주민등록번호',
-    type: 'text',
-    placeholder: '850226-1',
+    ...IDENTITY_INPUT_PROPS,
     onChange: e => {
       const { data: eventData } = e as InputEvent | { data: '' };
-      const { value = '' } = parseEventTargetToElement<HTMLInputElement>(
-        e.target,
-      );
-      if (eventData && eventData.match(new RegExp(/[^0-9]/, 'gi'))) {
-        parseEventTargetToElement<HTMLInputElement>(e.target).value =
-          data.registerNumber;
+      const target = parseEventTargetToElement<HTMLInputElement>(e.target);
+      const { value } = target;
+      if (eventData && !isNumberOnly(eventData)) {
+        target.value = data.registerNumber;
         return;
       }
-      data.registerNumber = value.replace(/[^0-9]/gi, '');
+      data.registerNumber = value.replace(NOT_NUMBER_REGEXP, '');
 
-      if (value.length === 0) {
+      if (data.registerNumber.length === 0) {
         IdentityInputComponent.classList.remove(styles.invalid);
       }
-      if (value.length >= 7) {
+      if (data.registerNumber.length == 7) {
         IdentityInputComponent.classList.remove(styles.invalid);
         const next = NameInputComponent.querySelector('input');
         if (next) next.focus();
@@ -119,48 +121,47 @@ export default function ({ onSubmit }: Props = {}): HTMLFormElement {
     },
     onBlur: e => {
       const target = parseEventTargetToElement<HTMLInputElement>(e.target);
-      target.value = target.value.replace(/(\d{6})(\d*)/gi, '$1-$2');
-      const { length } = data.registerNumber;
-      if (length !== 7) {
+      target.value = parseRegisterNumber(data.registerNumber);
+      if (checkIdentity(data.registerNumber)) {
+        IdentityInputComponent.classList.remove(styles.invalid);
+        error.set('registerNumber', true);
+      } else {
         IdentityInputComponent.classList.add(styles.invalid);
         error.set('registerNumber', false);
-        return;
       }
-      error.set('registerNumber', true);
-      IdentityInputComponent.classList.remove(styles.invalid);
+
+      updateValidation();
     },
   });
   const NameInputComponent = Input({
-    label: '이름',
-    type: 'name',
-    placeholder: '홍길동',
+    ...NAME_INPUT_PROPS,
     onChange: e => {
       const { data: eventData } = e as InputEvent | { data: '' };
-      const { value = '' } = parseEventTargetToElement<HTMLInputElement>(
-        e.target,
-      );
+      const target = parseEventTargetToElement<HTMLInputElement>(e.target);
+      const { value } = target;
       if (
         value.length > 10 ||
-        (eventData && eventData.match(new RegExp(/[^ㄱ-ㅎㅏ-ㅣ가-힣]/, 'gi')))
+        (eventData && eventData.match(KOREAN_REGEXP_ALL))
       ) {
-        parseEventTargetToElement<HTMLInputElement>(e.target).value = data.name;
+        target.value = data.name;
         return;
       }
       data.name = value;
     },
     onBlur: () => {
-      if (data.name.match(new RegExp(/[^가-힣]/, 'gi'))) {
+      if (checkName(data.name)) {
+        NameInputComponent.classList.remove(styles.invalid);
+        error.set('name', true);
+      } else {
         NameInputComponent.classList.add(styles.invalid);
         error.set('name', false);
-        return;
       }
-      error.set('name', true);
-      NameInputComponent.classList.remove(styles.invalid);
+      updateValidation();
     },
   });
   fragment.appendChild(
     Selectbox({
-      label: '통신사',
+      ...TELECOM_SELECT_PROPS,
       options: TELECOMS.map<Option>(({ code, description }) => ({
         name: description,
         value: code,
@@ -168,19 +169,20 @@ export default function ({ onSubmit }: Props = {}): HTMLFormElement {
       onChange: ({ target }) => {
         const { value } = parseEventTargetToElement<HTMLSelectElement>(target);
         data.carrierCode = value;
-        const next = TelInputComponent.querySelector('input');
+
+        const next = PhoneNumberInputComponent.querySelector('input');
         if (next) next.focus();
+
+        updateValidation();
       },
     }),
   );
-  data.carrierCode = TELECOMS[0].code;
-  fragment.appendChild(TelInputComponent);
+  fragment.appendChild(PhoneNumberInputComponent);
   fragment.appendChild(IdentityInputComponent);
   fragment.appendChild(NameInputComponent);
   fragment.appendChild(
     Message({
-      message:
-        '모든 정보가 올바르게 입력되었음에도 인증번호 요청이 되지않는 경우 가입하신 통신사에 문의해주세요.',
+      message: FORM_FAQ_MESSAGE,
     }),
   );
   fragment.appendChild(
@@ -197,27 +199,26 @@ export default function ({ onSubmit }: Props = {}): HTMLFormElement {
             data.termsCode = [];
             error.set('termsCode', false);
           }
-          checkValidations();
-          return;
+        } else {
+          const termsCodeSet = new Set(data.termsCode);
+          checked ? termsCodeSet.add(id) : termsCodeSet.delete(id);
+          data.termsCode = [...termsCodeSet];
+
+          const isCheckedRequiredTerms = REQUIRED_TERMS_IDS.reduce<boolean>(
+            (acc, termsId) => (acc ? acc && termsCodeSet.has(termsId) : acc),
+            true,
+          );
+          error.set('termsCode', isCheckedRequiredTerms);
         }
-        const termsCodeSet = new Set(data.termsCode);
-        checked ? termsCodeSet.add(id) : termsCodeSet.delete(id);
-        data.termsCode = [...termsCodeSet];
 
-        const isCheckedRequiredTerms = REQUIRED_TERMS_IDS.reduce<boolean>(
-          (acc, termsId) => (acc ? acc && termsCodeSet.has(termsId) : acc),
-          true,
-        );
-        error.set('termsCode', isCheckedRequiredTerms);
-
-        checkValidations();
+        updateValidation();
       },
     }),
   );
   const submitElement = document.createElement('button');
   submitElement.className = styles['submit-button'];
   submitElement.textContent = '인증번호 요청';
-  checkValidations();
+  updateValidation();
 
   fragment.appendChild(submitElement);
 

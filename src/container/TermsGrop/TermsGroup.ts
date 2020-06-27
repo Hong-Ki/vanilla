@@ -1,7 +1,8 @@
 import styles from './TermsGroup.module.scss';
 import { TERMS } from '../../constants/terms';
 import Checkbox from '../../components/Checkbox/Checkbox';
-import { isAllTrueMap, parseEventTargetToElement } from '../../util/common';
+import { isAllTrueMap } from '../../util/common';
+import { parseEventTargetToElement } from '../../util/parser';
 
 interface Props {
   onChange?(e: Event, isChangeAll?: boolean): void;

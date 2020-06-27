@@ -1,3 +1,5 @@
+import { NOT_NUMBER_REGEXP } from '../constants/identityForm';
+
 export function createId(prefix = ''): string {
   function s4() {
     return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
@@ -16,8 +18,6 @@ export function isAllTrueMap(map: Map<string, boolean>): boolean {
   return true;
 }
 
-export function parseEventTargetToElement<T extends HTMLElement>(
-  target: EventTarget | null,
-): T {
-  return target as T;
-}
+export const isNumberOnly = (text: string) => {
+  return text.match(NOT_NUMBER_REGEXP) === null;
+};
