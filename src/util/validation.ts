@@ -24,7 +24,10 @@ export interface Data {
 
 export type DataKey = keyof Data;
 
-export const checkAllValidation = (data: Data, error: Map<string, boolean>) => {
+export const checkAllValidation = (
+  data: Data,
+  error: Map<DataKey, boolean>,
+) => {
   return Object.entries(data).reduce<boolean>((acc, [key, value]) => {
     return acc
       ? acc && value.length > 0 && (error.get(key as DataKey) || false)

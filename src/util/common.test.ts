@@ -1,4 +1,4 @@
-import { createId, isAllTrueMap, parseEventTargetToElement } from './common';
+import { createId, isAllTrueMap, isNumberOnly } from './common';
 
 const testPrefix = 'test';
 describe('createId Test', () => {
@@ -23,6 +23,7 @@ describe('isAllTruMap Test', () => {
 
     expect(isAllTrueMap(testMap)).toBeTruthy();
   });
+
   test('return false Check', () => {
     const testMap = new Map();
     testMap.set('1', true);
@@ -33,4 +34,9 @@ describe('isAllTruMap Test', () => {
 
     expect(isAllTrueMap(testMap)).toBeFalsy();
   });
+});
+
+describe('isNumberOnly Test', () => {
+  expect(isNumberOnly('010123')).toBeTruthy();
+  expect(isNumberOnly('123 123')).toBeFalsy();
 });
